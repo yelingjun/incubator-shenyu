@@ -17,6 +17,9 @@
 
 package org.apache.shenyu.plugin.apache.dubbo.proxy;
 
+import cn.hutool.core.util.URLUtil;
+import com.sigma.common.base.exception.BusinessException;
+import com.sigma.common.base.result.H5Result;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -31,6 +34,7 @@ import org.apache.shenyu.common.exception.ShenyuException;
 import org.apache.shenyu.common.utils.ParamCheckUtils;
 import org.apache.shenyu.plugin.apache.dubbo.cache.ApacheDubboConfigCache;
 import org.apache.shenyu.plugin.dubbo.common.param.DubboParamResolveService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -75,21 +79,41 @@ public class ApacheDubboProxyService {
         } else {
             pair = dubboParamResolveService.buildParameter(body, metaData.getParameterTypes());
         }
+        fillUserLoginInfo2DubboContext(exchange);
         return Mono.fromFuture(invokeAsync(genericService, metaData.getMethodName(), pair.getLeft(), pair.getRight()).thenApply(ret -> {
             if (Objects.isNull(ret)) {
                 ret = Constants.DUBBO_RPC_RESULT_EMPTY;
             }
-            exchange.getAttributes().put(Constants.RPC_RESULT, ret);
+            exchange.getAttributes().put(Constants.RPC_RESULT, H5Result.success(ret));
             exchange.getAttributes().put(Constants.CLIENT_RESPONSE_RESULT_TYPE, ResultEnum.SUCCESS.getName());
             return ret;
-        })).onErrorMap(exception -> exception instanceof GenericException ? new ShenyuException(((GenericException) exception).getExceptionMessage()) : new ShenyuException(exception));
+        })).onErrorMap(exception -> {
+            if (exception instanceof BusinessException) {
+                return exception;
+            } else if (exception instanceof GenericException) {
+                return new ShenyuException(((GenericException) exception).getExceptionMessage());
+            } else {
+                return new ShenyuException(exception);
+            }
+        });
     }
     
     @SuppressWarnings("unchecked")
     private CompletableFuture<Object> invokeAsync(final GenericService genericService, final String method, final String[] parameterTypes, final Object[] args) throws GenericException {
         //Compatible with asynchronous calls of lower Dubbo versions
         genericService.$invoke(method, parameterTypes, args);
-        Object resultFromFuture = RpcContext.getContext().getFuture();
+        //Object resultFromFuture = RpcContext.getContext().getFuture();
+        Object resultFromFuture = RpcContext.getServiceContext().getFuture();
         return resultFromFuture instanceof CompletableFuture ? (CompletableFuture<Object>) resultFromFuture : CompletableFuture.completedFuture(resultFromFuture);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void fillUserLoginInfo2DubboContext(final ServerWebExchange exchange) {
+        HttpHeaders httpHeaders = exchange.getRequest().getHeaders();
+
+        RpcContext.getClientAttachment().setAttachment("customerId", URLUtil.encode(httpHeaders.getFirst("customerId")));
+        RpcContext.getClientAttachment().setAttachment("userId", URLUtil.encode(httpHeaders.getFirst("userId")));
+        RpcContext.getClientAttachment().setAttachment("orgId", URLUtil.encode(httpHeaders.getFirst("orgId")));
+        RpcContext.getClientAttachment().setAttachment("userRole", URLUtil.encode(httpHeaders.getFirst("userRole")));
     }
 }

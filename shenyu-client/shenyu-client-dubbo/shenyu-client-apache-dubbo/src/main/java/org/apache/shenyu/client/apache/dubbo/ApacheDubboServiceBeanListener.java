@@ -19,7 +19,9 @@ package org.apache.shenyu.client.apache.dubbo;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.dubbo.common.Constants;
+import org.apache.dubbo.common.constants.ClusterRules;
+import org.apache.dubbo.common.constants.CommonConstants;
+import org.apache.dubbo.common.constants.LoadbalanceRules;
 import org.apache.dubbo.config.spring.ServiceBean;
 import org.apache.shenyu.client.core.constant.ShenyuClientConstants;
 import org.apache.shenyu.client.core.disruptor.ShenyuClientRegisterEventPublisher;
@@ -115,7 +117,8 @@ public class ApacheDubboServiceBeanListener implements ApplicationListener<Conte
 
     private MetaDataRegisterDTO buildMetaDataDTO(final ServiceBean<?> serviceBean, final ShenyuDubboClient shenyuDubboClient, final Method method) {
         String appName = buildAppName(serviceBean);
-        String path = contextPath + shenyuDubboClient.path();
+        //String path = contextPath + shenyuDubboClient.path();
+        String path = shenyuDubboClient.path();
         String desc = shenyuDubboClient.desc();
         String serviceName = serviceBean.getInterface();
         String configRuleName = shenyuDubboClient.ruleName();
@@ -154,11 +157,11 @@ public class ApacheDubboServiceBeanListener implements ApplicationListener<Conte
         DubboRpcExt build = DubboRpcExt.builder()
                 .group(StringUtils.isNotEmpty(serviceBean.getGroup()) ? serviceBean.getGroup() : "")
                 .version(StringUtils.isNotEmpty(serviceBean.getVersion()) ? serviceBean.getVersion() : "")
-                .loadbalance(StringUtils.isNotEmpty(serviceBean.getLoadbalance()) ? serviceBean.getLoadbalance() : Constants.DEFAULT_LOADBALANCE)
-                .retries(Objects.isNull(serviceBean.getRetries()) ? Constants.DEFAULT_RETRIES : serviceBean.getRetries())
-                .timeout(Objects.isNull(serviceBean.getTimeout()) ? Constants.DEFAULT_CONNECT_TIMEOUT : serviceBean.getTimeout())
-                .sent(Objects.isNull(serviceBean.getSent()) ? Constants.DEFAULT_SENT : serviceBean.getSent())
-                .cluster(StringUtils.isNotEmpty(serviceBean.getCluster()) ? serviceBean.getCluster() : Constants.DEFAULT_CLUSTER)
+                .loadbalance(StringUtils.isNotEmpty(serviceBean.getLoadbalance()) ? serviceBean.getLoadbalance() : LoadbalanceRules.LEAST_ACTIVE)
+                .retries(Objects.isNull(serviceBean.getRetries()) ? CommonConstants.DEFAULT_RETRIES : serviceBean.getRetries())
+                .timeout(Objects.isNull(serviceBean.getTimeout()) ? CommonConstants.DEFAULT_TIMEOUT : serviceBean.getTimeout())
+                //.sent(Objects.isNull(serviceBean.getSent()) ? CommonConstants.s : serviceBean.getSent())
+                .cluster(StringUtils.isNotEmpty(serviceBean.getCluster()) ? serviceBean.getCluster() : ClusterRules.FAIL_OVER)
                 .url("")
                 .build();
         return GsonUtils.getInstance().toJson(build);

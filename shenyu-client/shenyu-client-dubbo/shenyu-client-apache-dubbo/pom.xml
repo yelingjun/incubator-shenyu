@@ -24,16 +24,16 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>shenyu-client-apache-dubbo</artifactId>
-
+    <version>2022.03.18-SNAPSHOT</version>
     <properties>
-        <apache.dubbo.version>2.7.0</apache.dubbo.version>
+        <apache.dubbo.version>3.0.3</apache.dubbo.version>
     </properties>
     
     <dependencies>
         <dependency>
             <groupId>org.apache.shenyu</groupId>
             <artifactId>shenyu-client-dubbo-common</artifactId>
-            <version>${project.version}</version>
+            <version>2.4.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.dubbo</groupId>
@@ -74,4 +74,16 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>snapshots</name>
+            <url>http://47.96.180.246:8088/repository/maven-releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>releases</name>
+            <url>http://47.96.180.246:8088/repository/maven-snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>
