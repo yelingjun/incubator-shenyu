@@ -69,12 +69,12 @@
         <repository>
             <id>releases</id>
             <name>snapshots</name>
-            <url>http://47.96.180.246:8088/repository/maven-releases</url>
+            <url>https://maven.sigmahouse.vip/repository/maven-releases</url>
         </repository>
         <snapshotRepository>
             <id>snapshots</id>
             <name>releases</name>
-            <url>http://47.96.180.246:8088/repository/maven-snapshots</url>
+            <url>https://maven.sigmahouse.vip/repository/maven-snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 </project>
