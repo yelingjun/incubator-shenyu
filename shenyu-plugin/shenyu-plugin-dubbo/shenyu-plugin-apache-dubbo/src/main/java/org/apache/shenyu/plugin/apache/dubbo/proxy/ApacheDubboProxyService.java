@@ -39,6 +39,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -110,10 +111,20 @@ public class ApacheDubboProxyService {
     @SuppressWarnings("unchecked")
     private void fillUserLoginInfo2DubboContext(final ServerWebExchange exchange) {
         HttpHeaders httpHeaders = exchange.getRequest().getHeaders();
-
-        RpcContext.getClientAttachment().setAttachment("customerId", URLUtil.encode(httpHeaders.getFirst("customerId")));
-        RpcContext.getClientAttachment().setAttachment("userId", URLUtil.encode(httpHeaders.getFirst("userId")));
-        RpcContext.getClientAttachment().setAttachment("orgId", URLUtil.encode(httpHeaders.getFirst("orgId")));
-        RpcContext.getClientAttachment().setAttachment("userRole", URLUtil.encode(httpHeaders.getFirst("userRole")));
+        Optional.ofNullable(URLUtil.encode(httpHeaders.getFirst("customerId"))).ifPresent(customerId -> {
+            RpcContext.getClientAttachment().setAttachment("sassCustomerId", customerId);
+        });
+        Optional.ofNullable(URLUtil.encode(httpHeaders.getFirst("userId"))).ifPresent(userId -> {
+            RpcContext.getClientAttachment().setAttachment("sassUserId", userId);
+        });
+        Optional.ofNullable(URLUtil.encode(httpHeaders.getFirst("orgId"))).ifPresent(orgId -> {
+            RpcContext.getClientAttachment().setAttachment("sassOrgId", orgId);
+        });
+        Optional.ofNullable(URLUtil.encode(httpHeaders.getFirst("userRole"))).ifPresent(userRole -> {
+            RpcContext.getClientAttachment().setAttachment("userType", userRole);
+        });
+        Optional.ofNullable(URLUtil.encode(httpHeaders.getFirst("accessToken"))).ifPresent(accessToken -> {
+            RpcContext.getClientAttachment().setAttachment("access-token", accessToken);
+        });
     }
 }
