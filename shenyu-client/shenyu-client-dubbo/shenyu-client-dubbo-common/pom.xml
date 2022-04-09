@@ -24,12 +24,24 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>shenyu-client-dubbo-common</artifactId>
-
+    <version>2022.03.18-SNAPSHOT</version>
     <dependencies>
         <dependency>
             <groupId>org.apache.shenyu</groupId>
             <artifactId>shenyu-client-core</artifactId>
-            <version>${project.version}</version>
+            <version>2.4.2</version>
         </dependency>
     </dependencies>
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>snapshots</name>
+            <url>https://maven.sigmahouse.vip/repository/maven-releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>releases</name>
+            <url>https://maven.sigmahouse.vip/repository/maven-snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>

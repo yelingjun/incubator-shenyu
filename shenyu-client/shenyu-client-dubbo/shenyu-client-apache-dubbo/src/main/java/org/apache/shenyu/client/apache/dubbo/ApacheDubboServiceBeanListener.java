@@ -110,7 +110,13 @@ public class ApacheDubboServiceBeanListener implements ApplicationListener<Conte
         for (Method method : methods) {
             ShenyuDubboClient shenyuDubboClient = method.getAnnotation(ShenyuDubboClient.class);
             if (Objects.nonNull(shenyuDubboClient)) {
-                publisher.publishEvent(buildMetaDataDTO(serviceBean, shenyuDubboClient, method));
+                MetaDataRegisterDTO metaDataRegisterDTO = buildMetaDataDTO(serviceBean, shenyuDubboClient, method);
+                String configRuleName = shenyuDubboClient.ruleName();
+                Arrays.stream(shenyuDubboClient.path()).forEach(path -> {
+                    metaDataRegisterDTO.setPath(contextPath + path);
+                    metaDataRegisterDTO.setRuleName(("".equals(configRuleName)) ? path : configRuleName);
+                    publisher.publishEvent(metaDataRegisterDTO);
+                });
             }
         }
     }
@@ -118,11 +124,10 @@ public class ApacheDubboServiceBeanListener implements ApplicationListener<Conte
     private MetaDataRegisterDTO buildMetaDataDTO(final ServiceBean<?> serviceBean, final ShenyuDubboClient shenyuDubboClient, final Method method) {
         String appName = buildAppName(serviceBean);
         //String path = contextPath + shenyuDubboClient.path();
-        String path = shenyuDubboClient.path();
         String desc = shenyuDubboClient.desc();
         String serviceName = serviceBean.getInterface();
         String configRuleName = shenyuDubboClient.ruleName();
-        String ruleName = ("".equals(configRuleName)) ? path : configRuleName;
+        //String ruleName = ("".equals(configRuleName)) ? path : configRuleName;
         String methodName = method.getName();
         Class<?>[] parameterTypesClazz = method.getParameterTypes();
         String parameterTypes = Arrays.stream(parameterTypesClazz).map(Class::getName).collect(Collectors.joining(","));
@@ -133,8 +138,8 @@ public class ApacheDubboServiceBeanListener implements ApplicationListener<Conte
                 .contextPath(contextPath)
                 .host(buildHost())
                 .port(buildPort(serviceBean))
-                .path(path)
-                .ruleName(ruleName)
+                //.path(path)
+                //.ruleName(ruleName)
                 .pathDesc(desc)
                 .parameterTypes(parameterTypes)
                 .rpcExt(buildRpcExt(serviceBean))

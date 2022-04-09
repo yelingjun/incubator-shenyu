@@ -17,6 +17,8 @@
 
 package org.apache.shenyu.client.dubbo.common.annotation;
 
+import org.springframework.core.annotation.AliasFor;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -36,7 +38,16 @@ public @interface ShenyuDubboClient {
      *
      * @return the string
      */
-    String path();
+    @AliasFor("value")
+    String[] path() default {};
+
+    /**
+     * Path string.
+     *
+     * @return the string
+     */
+    @AliasFor("path")
+    String[] value() default {};
 
     /**
      * Rule name string.

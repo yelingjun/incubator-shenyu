@@ -24,17 +24,17 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>shenyu-spring-boot-starter-client-apache-dubbo</artifactId>
-
+    <version>2022.03.18-SNAPSHOT</version>
     <dependencies>
         <dependency>
             <groupId>org.apache.shenyu</groupId>
             <artifactId>shenyu-client-apache-dubbo</artifactId>
-            <version>${project.version}</version>
+            <version>2022.03.18-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.shenyu</groupId>
             <artifactId>shenyu-spring-boot-starter-client-common</artifactId>
-            <version>${project.version}</version>
+            <version>2.4.2</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -52,4 +52,16 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>snapshots</name>
+            <url>https://maven.sigmahouse.vip/repository/maven-releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>releases</name>
+            <url>https://maven.sigmahouse.vip/repository/maven-snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>
