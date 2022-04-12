@@ -460,7 +460,7 @@ public interface Constants {
     /**
      * cache max count.
      */
-    int CACHE_MAX_COUNT = 1000;
+    int CACHE_MAX_COUNT = 2000;
 
     /**
      * the empty json.

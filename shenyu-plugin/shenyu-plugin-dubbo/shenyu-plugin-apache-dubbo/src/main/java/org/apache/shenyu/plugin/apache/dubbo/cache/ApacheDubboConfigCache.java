@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
 
@@ -53,6 +54,8 @@ public final class ApacheDubboConfigCache extends DubboConfigCache {
     private ApplicationConfig applicationConfig;
     
     private RegistryConfig registryConfig;
+
+    private ConcurrentHashMap<String, ReferenceConfig<GenericService>> referenceConfigMap = new ConcurrentHashMap<>(64);
     
     private final LoadingCache<String, ReferenceConfig<GenericService>> cache = CacheBuilder.newBuilder()
             .maximumSize(Constants.CACHE_MAX_COUNT)
@@ -137,10 +140,18 @@ public final class ApacheDubboConfigCache extends DubboConfigCache {
      */
     @SuppressWarnings("deprecation")
     public ReferenceConfig<GenericService> build(final MetaData metaData) {
+        ReferenceConfig<GenericService> reference = referenceConfigMap.get(metaData.getServiceName());
+        if (Objects.nonNull(reference)) {
+            cache.put(metaData.getPath(), reference);
+            LOG.info("find apache dubbo reference in cache there meteData is :{}", metaData);
+            return reference;
+        }
+
         if (Objects.isNull(applicationConfig) || Objects.isNull(registryConfig)) {
             return new ReferenceConfig<>();
         }
-        ReferenceConfig<GenericService> reference = new ReferenceConfig<>();
+        //ReferenceConfig<GenericService> reference = new ReferenceConfig<>();
+        reference = new ReferenceConfig<>();
         reference.setGeneric("true");
         reference.setAsync(true);
         
@@ -170,9 +181,11 @@ public final class ApacheDubboConfigCache extends DubboConfigCache {
             if (StringUtils.isNoneBlank(dubboParam.getCluster())) {
                 reference.setCluster(dubboParam.getCluster());
             }
+
             Optional.ofNullable(dubboParam.getTimeout()).ifPresent(reference::setTimeout);
             Optional.ofNullable(dubboParam.getRetries()).ifPresent(reference::setRetries);
             Optional.ofNullable(dubboParam.getSent()).ifPresent(reference::setSent);
+            Optional.ofNullable(dubboParam.getLoadbalance()).ifPresent(reference:: setLoadbalance);
         }
         try {
             Object obj = reference.get();
@@ -183,6 +196,7 @@ public final class ApacheDubboConfigCache extends DubboConfigCache {
         } catch (Exception e) {
             LOG.error("init apache dubbo reference exception", e);
         }
+        referenceConfigMap.put(metaData.getServiceName(), reference);
         return reference;
     }
     
