@@ -23,6 +23,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.ApplicationConfig;
+import org.apache.dubbo.config.ConsumerConfig;
 import org.apache.dubbo.config.ReferenceConfig;
 import org.apache.dubbo.config.RegistryConfig;
 import org.apache.dubbo.rpc.service.GenericService;
@@ -160,8 +161,12 @@ public final class ApacheDubboConfigCache extends DubboConfigCache {
         reference.setInterface(metaData.getServiceName());
         reference.setProtocol("dubbo");
         reference.setCheck(false);
-        reference.setLoadbalance("gray");
-        
+        reference.setLoadbalance("leastactive");
+
+        ConsumerConfig consumerConfig = new ConsumerConfig();
+        consumerConfig.setProvidedBy(metaData.getAppName());
+        reference.setConsumer(consumerConfig);
+
         Map<String, String> parameters = new HashMap<>(2);
         parameters.put("dispatcher", "direct");
         reference.setParameters(parameters);
