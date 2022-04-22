@@ -168,7 +168,7 @@ public final class ApacheDubboConfigCache extends DubboConfigCache {
         reference.setConsumer(consumerConfig);
 
         Map<String, String> parameters = new HashMap<>(2);
-        parameters.put("dispatcher", "direct");
+        parameters.put("dispatcher", "message");
         reference.setParameters(parameters);
         
         String rpcExt = metaData.getRpcExt();
