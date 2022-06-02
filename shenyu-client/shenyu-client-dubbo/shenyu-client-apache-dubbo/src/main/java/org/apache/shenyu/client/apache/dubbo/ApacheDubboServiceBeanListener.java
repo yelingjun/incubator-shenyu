@@ -110,9 +110,16 @@ public class ApacheDubboServiceBeanListener implements ApplicationListener<Conte
         for (Method method : methods) {
             ShenyuDubboClient shenyuDubboClient = method.getAnnotation(ShenyuDubboClient.class);
             if (Objects.nonNull(shenyuDubboClient)) {
-                MetaDataRegisterDTO metaDataRegisterDTO = buildMetaDataDTO(serviceBean, shenyuDubboClient, method);
-                String configRuleName = shenyuDubboClient.ruleName();
                 Arrays.stream(shenyuDubboClient.path()).forEach(path -> {
+                    MetaDataRegisterDTO metaDataRegisterDTO = buildMetaDataDTO(serviceBean, shenyuDubboClient, method);
+                    String configRuleName = shenyuDubboClient.ruleName();
+                    metaDataRegisterDTO.setPath(contextPath + path);
+                    metaDataRegisterDTO.setRuleName(("".equals(configRuleName)) ? path : configRuleName);
+                    publisher.publishEvent(metaDataRegisterDTO);
+                });
+                Arrays.stream(shenyuDubboClient.value()).forEach(path -> {
+                    MetaDataRegisterDTO metaDataRegisterDTO = buildMetaDataDTO(serviceBean, shenyuDubboClient, method);
+                    String configRuleName = shenyuDubboClient.ruleName();
                     metaDataRegisterDTO.setPath(contextPath + path);
                     metaDataRegisterDTO.setRuleName(("".equals(configRuleName)) ? path : configRuleName);
                     publisher.publishEvent(metaDataRegisterDTO);

@@ -24,12 +24,12 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>shenyu-spring-boot-starter-client-apache-dubbo</artifactId>
-    <version>2022.03.18-SNAPSHOT</version>
+    <version>sigma-2.4.3-SNAPSHOT</version>
     <dependencies>
         <dependency>
             <groupId>org.apache.shenyu</groupId>
             <artifactId>shenyu-client-apache-dubbo</artifactId>
-            <version>2022.03.18-SNAPSHOT</version>
+            <version>sigma-2.4.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.shenyu</groupId>
