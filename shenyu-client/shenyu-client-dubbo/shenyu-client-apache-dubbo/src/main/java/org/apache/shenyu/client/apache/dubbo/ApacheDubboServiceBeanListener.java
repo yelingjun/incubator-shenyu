@@ -38,12 +38,14 @@ import org.apache.shenyu.register.common.dto.URIRegisterDTO;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -108,21 +110,17 @@ public class ApacheDubboServiceBeanListener implements ApplicationListener<Conte
         }
         Method[] methods = ReflectionUtils.getUniqueDeclaredMethods(clazz);
         for (Method method : methods) {
-            ShenyuDubboClient shenyuDubboClient = method.getAnnotation(ShenyuDubboClient.class);
+            //ShenyuDubboClient shenyuDubboClient = method.getAnnotation(ShenyuDubboClient.class);
+            ShenyuDubboClient shenyuDubboClient = AnnotationUtils.findAnnotation(method, ShenyuDubboClient.class);
             if (Objects.nonNull(shenyuDubboClient)) {
-                Arrays.stream(shenyuDubboClient.path()).forEach(path -> {
-                    MetaDataRegisterDTO metaDataRegisterDTO = buildMetaDataDTO(serviceBean, shenyuDubboClient, method);
-                    String configRuleName = shenyuDubboClient.ruleName();
-                    metaDataRegisterDTO.setPath(contextPath + path);
-                    metaDataRegisterDTO.setRuleName(("".equals(configRuleName)) ? path : configRuleName);
-                    publisher.publishEvent(metaDataRegisterDTO);
-                });
-                Arrays.stream(shenyuDubboClient.value()).forEach(path -> {
-                    MetaDataRegisterDTO metaDataRegisterDTO = buildMetaDataDTO(serviceBean, shenyuDubboClient, method);
-                    String configRuleName = shenyuDubboClient.ruleName();
-                    metaDataRegisterDTO.setPath(contextPath + path);
-                    metaDataRegisterDTO.setRuleName(("".equals(configRuleName)) ? path : configRuleName);
-                    publisher.publishEvent(metaDataRegisterDTO);
+                Optional.ofNullable(shenyuDubboClient.value()).ifPresent(p -> {
+                    Arrays.stream(p).forEach(path -> {
+                        MetaDataRegisterDTO metaDataRegisterDTO = buildMetaDataDTO(serviceBean, shenyuDubboClient, method);
+                        String configRuleName = shenyuDubboClient.ruleName();
+                        metaDataRegisterDTO.setPath(buildHttpUrl(path));
+                        metaDataRegisterDTO.setRuleName(("".equals(configRuleName)) ? path : configRuleName);
+                        publisher.publishEvent(metaDataRegisterDTO);
+                    });
                 });
             }
         }
@@ -189,5 +187,12 @@ public class ApacheDubboServiceBeanListener implements ApplicationListener<Conte
     
     private int buildPort(final ServiceBean serviceBean) {
         return StringUtils.isBlank(this.port) ? serviceBean.getProtocol().getPort() : Integer.parseInt(this.port);
+    }
+
+    private String buildHttpUrl(final String path) {
+        if (path.startsWith("/")) {
+            return contextPath + path;
+        }
+        return contextPath + "/" + path;
     }
 }
